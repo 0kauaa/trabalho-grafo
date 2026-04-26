@@ -29,5 +29,6 @@ playlist = sp.playlist_tracks(
     playlist_id=playlist_id,
 )
 
-playlist_df = pd.DataFrame(playlist)
-playlist_df.to_csv('playlist.csv')
+# isolando as tracks
+tracks = pd.DataFrame([item['item'] for item in playlist['items'] if item is not None])
+tracks.to_csv('playlist.csv')

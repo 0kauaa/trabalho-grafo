@@ -1,0 +1,90 @@
+{ "playlist": 
+  {
+    "_comentario_sobre": "exemplo da estrutura de um item em playlist['item']",
+
+    "is_playable": true,
+    "explicit": false,
+    "type": "track",
+    "episode": false,
+    "track": true,
+    "disc_number": 1,
+    "track_number": 11,
+    "duration_ms": 242280,
+    "is_local": false,
+
+    "id": "1vcxF91pWs9uNwDROuiCPB",
+    "name": "Savior",
+    "uri": "spotify:track:1vcxF91pWs9uNwDROuiCPB",
+    "href": "https://api.spotify.com/v1/tracks/1vcxF91pWs9uNwDROuiCPB",
+
+    "external_ids": {
+      "isrc": "USUM70832584"
+    },
+
+    "external_urls": {
+      "spotify": "https://open.spotify.com/track/1vcxF91pWs9uNwDROuiCPB"
+    },
+
+    "artists": [
+      {
+        "id": "6Wr3hh341P84m3EI8qdn9O",
+        "name": "Rise Against",
+        "type": "artist",
+        "uri": "spotify:artist:6Wr3hh341P84m3EI8qdn9O",
+        "href": "https://api.spotify.com/v1/artists/6Wr3hh341P84m3EI8qdn9O",
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/6Wr3hh341P84m3EI8qdn9O"
+        }
+      }
+    ],
+
+    "album": {
+      "id": "4ebodSLpRqbuQjpGlDZglH",
+      "name": "Appeal To Reason",
+      "type": "album",
+      "album_type": "album",
+      "is_playable": true,
+      "release_date": "2008-01-01",
+      "release_date_precision": "day",
+      "total_tracks": 14,
+
+      "uri": "spotify:album:4ebodSLpRqbuQjpGlDZglH",
+      "href": "https://api.spotify.com/v1/albums/4ebodSLpRqbuQjpGlDZglH",
+
+      "external_urls": {
+        "spotify": "https://open.spotify.com/album/4ebodSLpRqbuQjpGlDZglH"
+      },
+
+      "artists": [
+        {
+          "id": "6Wr3hh341P84m3EI8qdn9O",
+          "name": "Rise Against",
+          "type": "artist",
+          "uri": "spotify:artist:6Wr3hh341P84m3EI8qdn9O",
+          "href": "https://api.spotify.com/v1/artists/6Wr3hh341P84m3EI8qdn9O",
+          "external_urls": {
+            "spotify": "https://open.spotify.com/artist/6Wr3hh341P84m3EI8qdn9O"
+          }
+        }
+      ],
+
+      "images": [
+        {
+          "height": 640,
+          "width": 640,
+          "url": "https://i.scdn.co/image/ab67616d0000b273eaa10fffa60de320846c28be"
+        },
+        {
+          "height": 300,
+          "width": 300,
+          "url": "https://i.scdn.co/image/ab67616d00001e02eaa10fffa60de320846c28be"
+        },
+        {
+          "height": 64,
+          "width": 64,
+          "url": "https://i.scdn.co/image/ab67616d00004851eaa10fffa60de320846c28be"
+        }
+      ]
+    }
+  }
+}

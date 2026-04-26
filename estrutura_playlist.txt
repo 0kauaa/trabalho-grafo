@@ -1,0 +1,15 @@
+playlist               <- objeto json (retorno de playlist_tracks())
+├── items              <- objeto das tracks (tambem json)
+│   ├── track          <- tracks (tambem json) que transformei em df
+│   │   ├── name       <- atributos das track (tambem json), cada um virou uma coluna
+│   │   ├── artists
+│   │   ├── album
+│   │   ├── uri
+│   │   └── ...
+|   ├── album
+|   ├── images
+|   └── ...
+├── next
+├── total
+├── limit
+└── ...
