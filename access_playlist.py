@@ -1,7 +1,7 @@
 # libs
-from auth import auth
-import json
 import pandas as pd
+from auth import auth
+from fetch import fetch
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -23,12 +23,19 @@ sp = spotipy.Spotify(
 user    = sp.current_user()
 user_id = user['id']
 
-# acessando e salvando playlist
+# acessando playlist
 playlist_id = 'spotify:playlist:1rWIhl1hpQnpkUDRV4RIKT'
 playlist = sp.playlist_tracks(
     playlist_id=playlist_id,
 )
 
-# isolando as tracks
-tracks = pd.DataFrame([item['item'] for item in playlist['items'] if item is not None])
-tracks.to_csv('playlist.csv')
+# isolando as tracks em um dataframe
+playlist = pd.DataFrame([item['item'] for item in playlist['items'] if item is not None], index=None)
+
+# mapeando os generos
+playlist['artist_id'] = playlist['artists'].apply(
+    lambda artists: artists[0]['id'] if artists else None
+)
+
+mapping = fetch(sp, playlist['artist_id'])
+playlist['genres'] = playlist['artist_id'].map(mapping)
