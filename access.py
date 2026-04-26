@@ -1,6 +1,7 @@
 # libs
 from auth import auth
 import json
+import pandas as pd
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -22,11 +23,11 @@ sp = spotipy.Spotify(
 user    = sp.current_user()
 user_id = user['id']
 
-# salvando playlist
+# acessando e salvando playlist
 playlist_id = 'spotify:playlist:1rWIhl1hpQnpkUDRV4RIKT'
 playlist = sp.playlist_tracks(
     playlist_id=playlist_id,
 )
 
-with open("playlist.json", "w") as outfile:
-    json.dump(playlist['items'], outfile)
+playlist_df = pd.DataFrame(playlist)
+playlist_df.to_csv('playlist.csv')
