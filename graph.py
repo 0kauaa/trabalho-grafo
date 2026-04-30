@@ -1,25 +1,17 @@
 import pandas as pd
 import numpy as np
 import igraph as ig
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics.pairwise import cosine_similarity
 from typing import List, Tuple
 
-# similaridade entre as músicas
-def compute_similarity(
-    df: pd.DataFrame,
-    weight_genre: float = 0.4,
-    weight_audio: float = 0.6
-) -> np.ndarray:
+# similaridade entre as músicas baseada em popularidade e artistas compartilhados
+def compute_similarity(df: pd.DataFrame) -> np.ndarray:
     """
-    calcula uma matriz de similaridade entre tracks
+    calcula uma matriz de similaridade entre tracks baseada em popularidade e artistas compartilhados
     
-    similaridade = w_genre * Jaccard(genres) + w_audio * cosine(audio_features)
+    similaridade = 0.7 * (1 - |pop1 - pop2| / 100) + 0.3 * (1 se artistas comuns, 0 caso contrário)
     
     args:
         df: dataFrame com tracks
-        weight_genre: peso dos gêneros (0-1)
-        weight_audio: peso dos audio features (0-1)
         
     returns:
         matriz de similaridade N×N
@@ -30,16 +22,13 @@ def compute_similarity(
     
     print(f"calculando similaridade para {n} tracks...")
     
-    # Normalizar audio features
-    audio_cols = ['danceability', 'energy', 'acousticness', 'instrumentalness', 
-                  'liveness', 'speechiness', 'valence']
-    audio_cols = [col for col in audio_cols if col in df.columns]
-    
-    if audio_cols:
-        scaler = StandardScaler()
-        audio_normalized = scaler.fit_transform(df[audio_cols].fillna(0))
-        audio_normalized = (audio_normalized - audio_normalized.min(axis=0)) / \
-                          (audio_normalized.max(axis=0) - audio_normalized.min(axis=0) + 1e-6)
+    # Normalizar popularidade
+    pop_min = df['popularity'].min()
+    pop_max = df['popularity'].max()
+    if pop_max > pop_min:
+        pop_normalized = (df['popularity'] - pop_min) / (pop_max - pop_min)
+    else:
+        pop_normalized = np.ones(n) * 0.5  # Se todas iguais, média
     
     # calculo da similaridade
     for i in range(n):
@@ -47,25 +36,17 @@ def compute_similarity(
             if i == j:
                 sim_matrix[i][j] = 1.0
             else:
-                # similaridade de gêneros (Jaccard)
-                g1 = set(df.iloc[i]['genres'])
-                g2 = set(df.iloc[j]['genres'])
+                # Similaridade de popularidade (inversa da diferença)
+                pop_diff = abs(pop_normalized[i] - pop_normalized[j])
+                sim_pop = 1.0 - pop_diff
                 
-                if len(g1 | g2) > 0:
-                    sim_genre = len(g1 & g2) / len(g1 | g2)
-                else:
-                    sim_genre = 0.0
+                # Similaridade de artistas (1 se compartilhado, 0 caso contrário)
+                artists_i = set(df.iloc[i]['artist_name'].split(', ')) if isinstance(df.iloc[i]['artist_name'], str) else set()
+                artists_j = set(df.iloc[j]['artist_name'].split(', ')) if isinstance(df.iloc[j]['artist_name'], str) else set()
+                sim_artists = 1.0 if artists_i & artists_j else 0.0
                 
-                # similaridade de audio features (cosine)
-                if audio_cols:
-                    a1 = audio_normalized[i].reshape(1, -1)
-                    a2 = audio_normalized[j].reshape(1, -1)
-                    sim_audio = cosine_similarity(a1, a2)[0][0]
-                else:
-                    sim_audio = 0.0
-                
-                # score composto
-                score = weight_genre * sim_genre + weight_audio * sim_audio
+                # Score composto
+                score = 0.7 * sim_pop + 0.3 * sim_artists
                 
                 # simetrizar
                 sim_matrix[i][j] = score
@@ -79,7 +60,7 @@ def compute_similarity(
 def extract_edges(
     df: pd.DataFrame,
     sim_matrix: np.ndarray,
-    threshold: float = 0.3,
+    threshold: float = 0.1,
     max_per_node: int = 10
 ) -> pd.DataFrame:
     """
@@ -158,7 +139,7 @@ def create_graph(df: pd.DataFrame, edges_df: pd.DataFrame) -> ig.Graph:
     g.vs['name'] = df['track_name'].tolist()
     g.vs['artist'] = df['artist_name'].tolist()
     g.vs['popularity'] = df['popularity'].tolist()
-    g.vs['genres'] = df['genres'].tolist()
+    g.vs['_original_id'] = list(range(len(df)))  # Para comunidades
     
     # tamanho baseado em popularidade
     pop_norm = (df['popularity'] - df['popularity'].min()) / \
@@ -215,39 +196,28 @@ def visualize_graph(g: ig.Graph, filepath: str = 'playlist_graph.png') -> None:
     print(f"\nvisualizando grafo...")
     
     # layout
-    layout = g.layout_fruchterman_reingold(niter=500, maxdelta=g.vcount())
-    
-    # cores por gênero
-    color_map = {}
-    colors_palette = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', 
-                      '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B195', '#C7CEEA']
-    color_idx = 0
-    
-    colors = []
-    for genres in g.vs['genres']:
-        if genres:
-            primary = genres[0]
-            if primary not in color_map:
-                color_map[primary] = colors_palette[color_idx % len(colors_palette)]
-                color_idx += 1
-            colors.append(color_map[primary])
-        else:
-            colors.append('#CCCCCC')
-    
-    g.vs['color'] = colors
+    layout = g.layout_fruchterman_reingold(niter=500)
+
+    # cor uniforme por nó, já que a similaridade não depende de gêneros
+    g.vs['color'] = ['#4ECDC4'] * g.vcount()
     
     # renderização
-    ig.plot(
-        g,
-        filepath,
-        layout=layout,
-        vertex_size=g.vs['size'],
-        vertex_color=g.vs['color'],
-        vertex_label=None,
-        edge_width=[w*2 for w in g.es['weight']] if 'weight' in g.es.attributes() else 1,
-        edge_color='gray',
-        edge_arrow_size=0,
-        margin=50
-    )
-    
-    print(f"grafo salvo em '{filepath}'")
+    try:
+        ig.plot(
+            g,
+            filepath,
+            layout=layout,
+            vertex_size=g.vs['size'],
+            vertex_color=g.vs['color'],
+            vertex_label=None,
+            edge_width=[w*2 for w in g.es['weight']] if 'weight' in g.es.attributes() else 1,
+            edge_color='gray',
+            edge_arrow_size=0,
+            margin=50
+        )
+        print(f"grafo salvo em '{filepath}'")
+    except AttributeError as e:
+        print(f"não foi possível gerar o gráfico: {e}")
+        print("instale pycairo ou cairocffi para habilitar a renderização de imagens")
+    except Exception as e:
+        print(f"erro ao gerar gráfico: {e}")

@@ -1,7 +1,7 @@
 # libs
 import sys
 from auth import auth
-from access import fetch_playlist_tracks, fetch_artist_genres, fetch_audio_features, get_spotify_client
+from access import fetch_playlist_tracks, get_spotify_client
 from dataframe import build_dataframe, summarize_dataframe
 from graph import compute_similarity, extract_edges, create_graph, detect_communities, visualize_graph
 
@@ -32,16 +32,10 @@ def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str
     print("-"*70)
     tracks = fetch_playlist_tracks(sp, playlist_id)
     
-    artist_ids = [t['artists'][0]['id'] for t in tracks if t['artists']]
-    genres = fetch_artist_genres(sp, artist_ids)
-    
-    track_ids = [t['id'] for t in tracks]
-    audio_feats = fetch_audio_features(sp, track_ids)
-    
     # 3. DATAFRAME
     print("\nESTRUTURAÇÃO DE DATAFRAME")
     print("-"*70)
-    df = build_dataframe(tracks, genres, audio_feats)
+    df = build_dataframe(tracks)
     summarize_dataframe(df)
     
     # salvar CSV
@@ -53,10 +47,10 @@ def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str
     print("-"*70)
     
     # similaridade
-    sim_matrix = compute_similarity(df, weight_genre=0.4, weight_audio=0.6)
+    sim_matrix = compute_similarity(df)
     
     # arestas
-    edges = extract_edges(df, sim_matrix, threshold=0.3, max_per_node=10)
+    edges = extract_edges(df, sim_matrix, threshold=0.6, max_per_node=10)
     edges.to_csv('playlist_edges.csv', index=False)
     print(f"arestas salvas em 'playlist_edges.csv'")
     
