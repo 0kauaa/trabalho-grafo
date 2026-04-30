@@ -1,13 +1,18 @@
 # libs
 import sys
-from auth import get_spotify_client
-from playlist import fetch_playlist_tracks, fetch_artist_genres, fetch_audio_features
+from auth import auth
+from access import fetch_playlist_tracks, fetch_artist_genres, fetch_audio_features, get_spotify_client
 from dataframe import build_dataframe, summarize_dataframe
-from grafo import compute_similarity, extract_edges, create_graph, detect_communities, visualize_graph
+from graph import compute_similarity, extract_edges, create_graph, detect_communities, visualize_graph
 
 def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str):
     """
     executa pipeline completo
+    1. autentiação
+    2. busca a playlist
+    3. cria o dataframe
+    4. monta o grafo
+    5. exibe os resultado
     
     args:
         client_id: id da aplicação spotify
@@ -84,15 +89,13 @@ def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str
 
 if __name__ == "__main__":
     # credenciais
-    CLIENT_ID = "id"
-    CLIENT_SECRET = "secret"
-    REDIRECT_URI = "http://localhost:8888/callback"
+    CLIENT_ID, CLIENT_SECRET, REDIRECT_URI = auth()
     
     # playlist
-    PLAYLIST_ID = "spotify:playlist:1rWIhl1hpQnpkUDRV4RIKT"
+    PLAYLIST_ID = "https://open.spotify.com/playlist/1rWIhl1hpQnpkUDRV4RIKT?si=236100feb9e141ed"
     
     # validação
-    if CLIENT_ID == "seu_client_id":
+    if CLIENT_ID == "client_id":
         print("configure CLIENT_ID e CLIENT_SECRET em main()")
         sys.exit(1)
     
