@@ -1,9 +1,9 @@
 # libs
 import sys
-from auth import auth
-from access import fetch_playlist_tracks, get_spotify_client
-from dataframe import build_dataframe, summarize_dataframe
-from graph import compute_similarity, extract_edges, create_graph, detect_communities, visualize_graph
+from src.auth import auth
+from src.access import fetch_playlist_tracks, get_spotify_client
+from src.dataframe import build_dataframe, summarize_dataframe
+from src.graph import compute_similarity, extract_edges, create_graph, detect_communities, visualize_graph
 
 def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str):
     """
