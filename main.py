@@ -39,7 +39,7 @@ def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str
     summarize_dataframe(df)
     
     # salvar CSV
-    df.to_csv('playlist_data.csv', index=False)
+    df.to_csv('data/playlist_data.csv', index=False)
     print(f"\ndados salvos em 'playlist_data.csv'")
     
     # 4. GRAFO
@@ -51,7 +51,7 @@ def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str
     
     # arestas
     edges = extract_edges(df, sim_matrix, threshold=0.6, max_per_node=10)
-    edges.to_csv('playlist_edges.csv', index=False)
+    edges.to_csv('data/playlist_edges.csv', index=False)
     print(f"arestas salvas em 'playlist_edges.csv'")
     
     # grafo igraph
@@ -62,10 +62,10 @@ def main(client_id: str, client_secret: str, redirect_uri: str, playlist_id: str
     print(f"comunidades: {[len(c) for c in communities]}")
     
     # visualizar
-    visualize_graph(graph, 'playlist_graph.png')
+    visualize_graph(graph, 'graphs/playlist_graph.png')
     
     # salvar grafo
-    graph.write_graphml('playlist_graph.graphml')
+    graph.write_graphml('graphs/playlist_graph.graphml')
     print(f"grafo salvo em 'playlist_graph.graphml'")
     
     # RESUMO FINAL
