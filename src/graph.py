@@ -179,7 +179,7 @@ def detect_communities(g: ig.Graph) -> List[List[int]]:
     
     communities = [partition.subgraph(i).vs['_original_id'] for i in range(len(partition))]
     
-    print(f"✅ {len(communities)} comunidades detectadas")
+    print(f"{len(communities)} comunidades detectadas")
     
     return communities
 
