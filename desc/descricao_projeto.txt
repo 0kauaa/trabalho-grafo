@@ -1,0 +1,74 @@
+Descrição do Projeto
+====================
+
+Visão geral
+-----------
+O projeto analisa uma playlist do Spotify e constrói um grafo de similaridade entre faixas. O foco atual é uma implementação simples, estável e mínima, baseada apenas em metadados disponíveis da playlist.
+
+Objetivo atual
+--------------
+- Buscar todas as faixas de uma playlist do Spotify.
+- Consolidar apenas os dados essenciais em um DataFrame: ID da faixa, nome, artista principal, duração, popularidade e indicação de explicitude.
+- Calcular similaridade entre faixas com uma métrica leve: popularidade normalizada e artistas compartilhados.
+- Gerar um grafo não-direcionado a partir dessa similaridade.
+- Detectar comunidades no grafo usando o algoritmo Louvain.
+- Salvar os resultados em CSV e gerar um gráfico em PNG/GraphML.
+
+Componentes principais
+----------------------
+- `main.py`
+  - Orquestra a execução completa.
+  - Autentica no Spotify usando `auth.py`.
+  - Busca a playlist.
+  - Gera o DataFrame.
+  - Calcula similaridades e extrai arestas.
+  - Cria o grafo, detecta comunidades e visualiza o resultado.
+
+- `access.py`
+  - Contém apenas a função `fetch_playlist_tracks` para obter as tracks da playlist.
+  - Contém `get_spotify_client` para criar o cliente Spotipy autenticado.
+  - Foi removido todo o código de busca de gêneros e audio features que não é usado no fluxo atual.
+
+- `dataframe.py`
+  - Constrói um DataFrame simples com os atributos essenciais de cada track.
+  - Resume a playlist com número de faixas, artistas únicos, duração total e top 5 artistas.
+  - Não utiliza mais gêneros nem audio features.
+
+- `graph.py`
+  - `compute_similarity`: calcula a matriz de similaridade baseada em:
+    - 70% popularidade normalizada (distância inversa).
+    - 30% artistas compartilhados (1 para faixas que têm artista em comum, 0 caso contrário).
+  - `extract_edges`: seleciona até `max_per_node` arestas por nó e filtra por threshold de similaridade.
+  - `create_graph`: monta o grafo `igraph` com atributos de vértice e peso de aresta.
+  - `detect_communities`: usa `community_multilevel` (Louvain) para agrupar nós.
+  - `visualize_graph`: desenha o grafo com cor uniforme e tamanho de nó baseado em popularidade.
+
+Mudanças em relação à ideia original
+------------------------------------
+A ideia original utilizava dados mock e cálculos de similaridade mais complexos, com dependência de gênero e audio features. As principais mudanças foram:
+
+- Remoção completa de toda a implementação de dados mock.
+- Remoção de chamadas e estruturas relacionadas a gêneros de artista.
+- Remoção de chamadas e estruturas relacionadas a audio features.
+- Simplificação do DataFrame para conter apenas os campos necessários.
+- Substituição do cálculo de similaridade por uma métrica simples e determinística.
+- Remoção do arquivo `fetch.py`, que fazia busca de gêneros com lógica antiga.
+- Remoção de importações e código auxiliares que não eram necessários para o pipeline atual.
+
+Racional técnico
+----------------
+- A dependência de `spotipy` é mantida apenas para autenticação e leitura da playlist.
+- A biblioteca `pandas` estrutura os dados e facilita a análise.
+- `igraph` é usada para modelar o grafo, detectar comunidades e renderizar a imagem.
+- A similaridade não depende de dados externos adicionais, evitando falhas de API ou necessidade de escopos extras.
+
+Arquivos gerados
+----------------
+- `playlist_data.csv`: tabela com as faixas carregadas.
+- `playlist_edges.csv`: arestas do grafo com pesos de similaridade.
+- `playlist_graph.png`: visualização do grafo.
+- `playlist_graph.graphml`: grafo serializado para análise externa.
+
+Considerações finais
+-------------------
+A implementação atual é mais enxuta e mantém apenas o essencial para gerar um grafo de playlist. Ela preserva a função prática do projeto sem a complexidade extra de atributos que não estão sendo usados ou que dependem de autorização/lógicas adicionais.
