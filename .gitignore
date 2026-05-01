@@ -1,5 +1,13 @@
-auth.txt
-/.venv/
+# ambientes
+.venv/
+
+# python
 __pycache__/
+*.pyc
+
+# cache geral
 .cache
+
+# arquivos específicos
+auth.txt
 descricao_projeto.txt
