@@ -1,5 +1,5 @@
 auth.txt
 /.venv/
-/src/__pycache__
+__pycache__/
 .cache
 descricao_projeto.txt
