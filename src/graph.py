@@ -9,7 +9,7 @@ def compute_similarity(df: pd.DataFrame) -> np.ndarray:
     calcula uma matriz de similaridade entre tracks baseada em popularidade e artistas compartilhados
     
     similaridade = 0.7 * (1 - |pop1 - pop2| / 100) + 0.3 * (1 se artistas comuns, 0 caso contrário)
-    
+        
     args:
         df: dataFrame com tracks
         
