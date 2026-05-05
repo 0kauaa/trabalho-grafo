@@ -259,9 +259,7 @@ playlist-communities/
    - CSV de arestas mostra todos os pesos de similaridade
 4. **Decomposição da playlist**
 
-   * Decompor uma playlist em diferentes outras por comunidades identificadas
-
-## Dicas de Interpretação
+   * Decompor uma playlist em diferentes outras por comunidades identificadasDicas de Interpretação
 
 - Se a maioria dos nós está no centro → seu gosto é "hits"
 - Se há clusters bem separados → você tem múltiplos estilos/públicos
