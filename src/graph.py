@@ -144,7 +144,7 @@ def create_graph(df: pd.DataFrame, edges_df: pd.DataFrame) -> ig.Graph:
     # tamanho baseado em popularidade
     pop_norm = (df['popularity'] - df['popularity'].min()) / \
                (df['popularity'].max() - df['popularity'].min() + 1e-6)
-    g.vs['size'] = (pop_norm * 20 + 5).tolist()
+    g.vs['size'] = [15] * len(df)
     
     # atributos de arestas
     if weights:
@@ -168,40 +168,62 @@ def detect_communities(g: ig.Graph) -> List[List[int]]:
     
     if g.ecount() == 0:
         print("grafo sem arestas - sem comunidades para detectar")
+        g.vs['community'] = [0] * g.vcount()
         return [[i] for i in range(g.vcount())]
-    
+
     print(f"detectando comunidades...")
-    
+
     if 'weight' in g.es.attributes():
         partition = g.community_multilevel(weights='weight')
     else:
         partition = g.community_multilevel()
-    
+
+    # gravar comunidade em cada vértice
+    membership = partition.membership
+    g.vs['community'] = membership
+
     communities = [partition.subgraph(i).vs['_original_id'] for i in range(len(partition))]
-    
     print(f"{len(communities)} comunidades detectadas")
-    
     return communities
+
 
 # visualização
 def visualize_graph(g: ig.Graph, filepath: str = 'playlist_graph.png') -> None:
     """
-    visualiza o grafo e salva como imagem
+    visualiza o grafo e salva como imagem, com nós coloridos por comunidade
     
     args:
         g: grafo igraph
         filepath: caminho para salvar imagem
     """
-    
+
     print(f"\nvisualizando grafo...")
-    
-    # layout
+
     layout = g.layout_fruchterman_reingold(niter=500)
 
-    # cor uniforme por nó, já que a similaridade não depende de gêneros
-    g.vs['color'] = ['#4ECDC4'] * g.vcount()
-    
-    # renderização
+    # paleta de cores por comunidade
+    palette = [
+    '#FF3333',  # vermelho vivo
+    '#33FF57',  # verde neon
+    '#3399FF',  # azul
+    '#FF33F5',  # magenta
+    '#FFD700',  # amarelo ouro
+    '#FF8C00',  # laranja
+    '#00FFFF',  # ciano
+    '#FF69B4',  # rosa
+    '#7FFF00',  # verde limão
+    '#9B59B6',  # roxo
+    '#00CED1',  # turquesa
+    '#FF6347',  # tomate
+]
+
+    if 'community' in g.vs.attributes():
+        colors = [palette[c % len(palette)] for c in g.vs['community']]
+    else:
+        colors = ['#4ECDC4'] * g.vcount()
+
+    g.vs['color'] = colors
+
     try:
         ig.plot(
             g,
@@ -210,14 +232,14 @@ def visualize_graph(g: ig.Graph, filepath: str = 'playlist_graph.png') -> None:
             vertex_size=g.vs['size'],
             vertex_color=g.vs['color'],
             vertex_label=None,
-            edge_width=[w*2 for w in g.es['weight']] if 'weight' in g.es.attributes() else 1,
-            edge_color='gray',
+            edge_width=[w * 2 for w in g.es['weight']] if 'weight' in g.es.attributes() else 1,
+            edge_color='#CCCCCC',
             edge_arrow_size=0,
             margin=50
         )
         print(f"grafo salvo em '{filepath}'")
     except AttributeError as e:
         print(f"não foi possível gerar o gráfico: {e}")
-        print("instale pycairo ou cairocffi para habilitar a renderização de imagens")
+        print("instale pycairo ou cairocffi para habilitar a renderização")
     except Exception as e:
         print(f"erro ao gerar gráfico: {e}")

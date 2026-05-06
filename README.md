@@ -4,7 +4,7 @@ Análise de similaridade e detecção de comunidades em playlists do Spotify atr
 
 ## Visão Geral
 
-Este projeto é uma atividade acadêmica da matéria de Processamento de Linguegem Natural do curso de Ciência de Dados da Fatec Baixada Santista "Rubens Lara". O projeto analisa uma playlist do Spotify e constrói um grafo de similaridade entre faixas, identificando automaticamente agrupamentos (comunidades) de músicas similares usando o algoritmo Louvain.
+Este projeto é uma atividade acadêmica da matéria de Processamento de Linguagem Natural do curso de Ciência de Dados da Fatec Baixada Santista "Rubens Lara". O projeto analisa uma playlist do Spotify e constrói um grafo de similaridade entre faixas, identificando automaticamente agrupamentos (comunidades) de músicas similares usando o algoritmo Louvain.
 
 A métrica de similaridade combina:
 
@@ -40,7 +40,19 @@ source .venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-### 4. Configurar credenciais Spotify
+### 4. Instalar dependência de renderização (opcional)
+
+A geração da imagem do grafo (`playlist_graph.png`) requer `pycairo` ou `cairocffi`. Sem elas, o pipeline executa normalmente e avisa no terminal — o grafo ainda é exportado em GraphML, mas a imagem não é gerada.
+
+```bash
+pip install pycairo
+# ou
+pip install cairocffi
+```
+
+> **Windows**: o `pycairo` pode exigir instalação manual de binários. Consulte [pygobject.gnome.org](https://pygobject.gnome.org/getting_started.html) ou use o `cairocffi` como alternativa.
+
+### 5. Configurar credenciais Spotify
 
 Crie um arquivo `auth.txt` na raiz do projeto com:
 
@@ -73,11 +85,11 @@ O programa solicitará um ID, URI ou URL de playlist do Spotify.
 Após a execução, os seguintes arquivos serão criados:
 
 | Arquivo                           | Descrição                                                                               |
-| --------------------------------- | ----------------------------------------------------------------------------------------- |
-| `data/playlist_data.csv`        | Dados estruturados das músicas (ID, nome, artista, duração, popularidade, explicitude) |
-| `data/playlist_edges.csv`       | Arestas do grafo com pesos de similaridade                                                |
-| `graphs/playlist_graph.png`     | Visualização do grafo                                                                   |
-| `graphs/playlist_graph.graphml` | Grafo em formato GraphML (compatível com Gephi, Cytoscape, etc.)                         |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| `data/playlist_data.csv`          | Dados estruturados das músicas (ID, nome, artista, duração, popularidade, explicitude) |
+| `data/playlist_edges.csv`         | Arestas do grafo com pesos de similaridade                                              |
+| `graphs/playlist_graph.png`       | Visualização do grafo (requer pycairo ou cairocffi)                                    |
+| `graphs/playlist_graph.graphml`   | Grafo em formato GraphML (compatível com Gephi, Cytoscape, etc.)                        |
 
 ## Componentes
 
@@ -146,7 +158,7 @@ O grafo é renderizado com:
 
 ### O Que Significa o Grafo?
 
-**Nós** = Cada música da playlist
+**Nós** = Cada música da playlist  
 **Arestas** = Conexão entre duas músicas similares
 
 ### Fórmula de Similaridade
@@ -196,17 +208,18 @@ Comunidade 2-5 (50% dos nós) = Artistas em diferentes faixas de popularidade
 Comunidades menores (10%) = Outliers ou descobertas pessoais
 ```
 
+### Comunidades Dominadas por um Único Artista
+
+É esperado que artistas com muitas faixas na playlist formem comunidades próprias. O peso de 30% para artistas compartilhados, combinado com a proximidade de popularidade entre faixas do mesmo artista, tende a agrupar essas músicas antes que o algoritmo as conecte com o restante. Isso não é um artefato — é uma consequência direta da fórmula e reflete o peso real daquele artista no seu gosto.
+
 ### Métricas Úteis
 
 - **Densidade**: % de todas as possíveis arestas que existem
-
   - Alta (>50%) = Playlist concentrada em popularidades parecidas
   - Baixa (<30%) = Variedade grande de popularidades
 - **Grau médio**: Quantas conexões cada música tem em média
-
   - Saudável: 10-20 para ~40 nós
 - **Tamanho das comunidades**:
-
   - Comunidade grande = Seu "gosto principal"
   - Comunidades pequenas = Experimentação
 
@@ -216,6 +229,7 @@ Comunidades menores (10%) = Outliers ou descobertas pessoais
 - `numpy`: operações numéricas
 - `spotipy`: autenticação e acesso à API do Spotify
 - `python-igraph`: construção e análise de grafos
+- `pycairo` ou `cairocffi`: renderização da imagem do grafo (opcional)
 
 ## Estrutura de Diretórios
 
@@ -243,41 +257,20 @@ playlist-communities/
     └── exemplo_item.json
 ```
 
-## O Que Pode Fazer Com Seus Resultados
-
-1. **Entender seu padrão de escuta**
-
-   - Qual é seu "core" de hits? (comunidade maior)
-   - Qual % é exploração vs hits conhecidos?
-2. **Análise de recomendações**
-
-   - Artistas na comunidade maior podem ter mais música para explorar
-   - Comunidades pequenas podem revelar gêneros ou artistas de nicho
-3. **Exportação para outras ferramentas**
-
-   - Arquivo GraphML pode ser aberto em Gephi ou Cytoscape
-   - CSV de arestas mostra todos os pesos de similaridade
-4. **Decomposição da playlist**
-
-   * Decompor uma playlist em diferentes outras por comunidades identificadasDicas de Interpretação
-
-- Se a maioria dos nós está no centro → seu gosto é "hits"
-- Se há clusters bem separados → você tem múltiplos estilos/públicos
-- Se uma comunidade é 50%+ → essa é sua preferência principal
-- Arestas espessas = similaridade alta (mesmo artista ou popularidade muito parecida)
-
 ## Limitações e Considerações
 
 - A API do Spotify tem limites de requisição (rate limiting)
 - Playlists muito grandes podem levar tempo para processar
 - A qualidade das comunidades detectadas depende do threshold de similaridade configurado
 - Requer acesso a internet para autenticação e busca de dados
-- Esta implementação não analisa gênero ou audio features, apenas popularidade e artistas
+- Esta implementação não analisa gênero ou audio features — apenas popularidade e artistas compartilhados. Duas músicas do mesmo artista com popularidades próximas ficam agrupadas independentemente de soarem parecidas
+- Sem `pycairo` ou `cairocffi`, o pipeline avisa no terminal e continua a execução; o grafo é exportado normalmente em GraphML, mas a mensagem de confirmação da imagem é exibida mesmo sem o arquivo ter sido gerado
 
 ## Licença
 
 MIT
 
-## Autor
+## Autores
 
 Kauã Santana
+Victor Leme

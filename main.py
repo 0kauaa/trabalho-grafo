@@ -63,6 +63,24 @@ def main(client_id: str, client_secret: str, redirect_uri: str):
     # comunidades
     communities = detect_communities(graph)
     print(f"comunidades: {[len(c) for c in communities]}")
+
+    # identificar artistas por comunidade
+    print("\nCOMUNIDADES DETECTADAS")
+    print("-"*70)
+    membership = graph.vs['community']
+    num_communities = max(membership) + 1
+
+    for i in range(num_communities):
+        artistas = {}
+        for node_idx, comm in enumerate(membership):
+            if comm == i:
+                artista = graph.vs[node_idx]['artist']
+                artistas[artista] = artistas.get(artista, 0) + 1
+        top = sorted(artistas.items(), key=lambda x: x[1], reverse=True)[:5]
+        total = sum(artistas.values())
+        print(f"\nComunidade {i} ({total} faixas):")
+        for artista, count in top:
+            print(f"  {artista}: {count} faixa(s)")
     
     # visualizar
     visualize_graph(graph, 'graphs/playlist_graph.png')
