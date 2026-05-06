@@ -272,5 +272,5 @@ MIT
 
 ## Autores
 
-Kauã Santana
-Victor Leme
+- Kauã Santana
+- Victor Leme
