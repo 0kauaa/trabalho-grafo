@@ -1,6 +1,0 @@
-pandas
-numpy
-spotipy
-python-igraph
-cairocffi
-pycairo

@@ -1,0 +1,11 @@
+# modules dependencies
+pandas
+numpy
+spotipy
+python-igraph
+cairocffi
+
+# notebook dependencies
+lyricsgenius
+sentence-transformers
+scikit-learn
